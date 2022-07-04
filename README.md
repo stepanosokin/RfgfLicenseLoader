@@ -81,7 +81,7 @@ my_rfgfLoader.download('<<path to json request file>>', '<<path to result json f
 7) use the attached d_r.gpkg geopackage ar create an empty geopackage with multipolygon layer l_b (you can use QGIS) with WGS-1984 GCS and the following attribute structure:
 
 field_name Type Length
-
+------------------------------
 gos_reg_num String 0
 date_register Date 0
 license_purpose String 0
