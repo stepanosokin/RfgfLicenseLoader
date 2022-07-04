@@ -1,5 +1,8 @@
 # RfgfLicenseLoader
-Python script to download data from https://rfgf.ru/ReestrLic/
+
+There is a wonderful site https://rfgf.ru/ReestrLic/ which contains information about all the license blocks in Russian Federation provided by Rosgeolfond. The good news is that you can download all the database from its webservice and use it offline in your GIS.
+
+This is Python script to download data from https://rfgf.ru/ReestrLic/.
 This script contains the class RfgfLicenseDownloader to download, parse and save to Geopackage the License Blocks data from https://rfgf.ru/ReestrLic/ website.
 The class has 2 main methods:
 
