@@ -38,7 +38,8 @@ class RfgfLicenseLoader():
                                           # 'cookie': '_ym_uid=1656406763932208622; _ym_d=1656406763; _ym_isad=2',
                                           'dnt': '1'
                                           },
-                                 json=json_object
+                                 json=json_object,
+                                 verify=False
                                  )
         data = response.json()
         a_file = open(json_result, "w")
