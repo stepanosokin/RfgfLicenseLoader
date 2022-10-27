@@ -267,8 +267,9 @@ class RfgfLicenseLoader():
                     if self.dms_to_dec(row[2]) > coords_threshold and self.dms_to_dec(row[1]) > coords_threshold:
                         point = QgsPointXY(self.dms_to_dec(row[2]), self.dms_to_dec(row[1]))
                         point_geom = QgsGeometry.fromPointXY(point)
-                        point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
-                        ring_list_of_points.append(point_geom.asPoint())
+                        if abs(point.y()) <= 90 and abs(point.x()) <= 180:
+                            point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
+                            ring_list_of_points.append(point_geom.asPoint())
 
         if len(ring_list_of_points) > 2:
             ring_list_of_points.append(ring_first_point)
