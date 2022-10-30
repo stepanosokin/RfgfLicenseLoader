@@ -43,7 +43,7 @@ class RfgfLicenseLoader():
                                  )
         data = response.json()
         a_file = open(json_result, "w")
-        json.dump(data, a_file)
+        json.dump(data, a_file, ensure_ascii=False)
         a_file.close()
 
 
