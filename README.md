@@ -62,6 +62,8 @@ What you need to do to use the script:
 2) qgis and osgeo Python libraries in your Python environment. OSGeo4W software package is a good option. If have OSGeo4w installed and want to configure PyCharm to use with QGIS (PyQgis), you may use these instructions: https://haifengniu.com/post/how-to-set-environment-for-pyqgis-3-in-pycharm/
 
 3) Create new project. Add RfgfLicenseLoader.py file to the project.
+OR
+just clone the project from here using git.
 
 4) create an instance of RfgfLicenseLoader class:
 my_RfgfLoader = RfgfLicenseLoader()
