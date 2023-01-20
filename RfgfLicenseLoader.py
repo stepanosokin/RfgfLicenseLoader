@@ -183,6 +183,7 @@ class RfgfLicenseLoader():
         row_has_coords = False
         cur_crs_name = ''
         ring_first_point = QgsPointXY(0, 0)
+        ring_first_point_transf = QgsPointXY(0, 0)
 
         context = QgsCoordinateTransformContext()
         pulkovo42_crs = QgsCoordinateReferenceSystem.fromEpsgId(4284)
@@ -226,12 +227,14 @@ class RfgfLicenseLoader():
                         (any('Система' in word3 for word3 in list(row)) and any('координат' in word4 for word4 in list(row))):
                     if len(ring_list_of_points) > 0:
                         if len(ring_list_of_points) > 2:
-                            ring_list_of_points.append(ring_first_point)
+                            if ring_first_point_transf.x() > coords_threshold and ring_first_point_transf.y() > coords_threshold and ring_first_point_transf.x() <= 180 and ring_first_point_transf.y() <= 90:
+                                ring_list_of_points.append(ring_first_point_transf)
                             pol_list_of_rings.append(ring_list_of_points)
                             multipol_list_of_pols.append(pol_list_of_rings)
                         ring_list_of_points = []
                         pol_list_of_rings = []
                         ring_first_point = QgsPointXY(0, 0)
+                        ring_first_point_transf = QgsPointXY(0, 0)
                     # in_pol = 1
 
                 if row[0] == '1' and row_has_coords:
@@ -242,7 +245,8 @@ class RfgfLicenseLoader():
                             first_points_after_multipoint_counter = 0
 
                     if len(ring_list_of_points) > 2:
-                        ring_list_of_points.append(ring_first_point)
+                        if ring_first_point_transf.x() > coords_threshold and ring_first_point_transf.y() > coords_threshold and ring_first_point_transf.x() <= 180 and ring_first_point_transf.y() <= 90:
+                            ring_list_of_points.append(ring_first_point_transf)
                         pol_list_of_rings.append(ring_list_of_points)
                     ring_list_of_points = []
                     ring_first_point = QgsPointXY(0, 0)
@@ -313,7 +317,9 @@ my_rfgfLoader = RfgfLicenseLoader()
 
 ## 1. download the json data file with license blocks data from https://rfgf.ru/ReestrLic/ site. Uncomment.
 ## Read the function infostring carefully. Run the function.
-my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
+# my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
+my_rfgfLoader.download('rfgf_request_example_УЛН09160НР.json', 'rfgf_request_result_УЛН09160НР.json')
+
 
 
 
@@ -321,5 +327,6 @@ my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_reques
 # my_rfgfLoader.parse('rfgf_request_result_noFilter_10.json')
 
 ## 3. Convert json data from json to geopackage. Uncomment. Read the function infostring carefully. Run.
-my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r__.gpkg', 'l_b')
+# my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r__.gpkg', 'l_b')
+my_rfgfLoader.json2gpkg('rfgf_request_result_УЛН09160НР.json', 'd_r_.gpkg', 'l_b')
 
