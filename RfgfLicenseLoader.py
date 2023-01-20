@@ -200,10 +200,10 @@ class RfgfLicenseLoader():
         for row in splitted_geom:
             if len(row) > 0:
                 row_has_coords = False
-                row1 = row
-                row2 = row
-                row3 = row
-                row4 = row
+                # row1 = row
+                # row2 = row
+                # row3 = row
+                # row4 = row
                 for word in list(row):
                     if 'ГСК-2011' in word:
                         cur_crs = gsk2011_crs
@@ -310,13 +310,13 @@ my_rfgfLoader = RfgfLicenseLoader()
 
 ## 1. download the json data file with license blocks data from https://rfgf.ru/ReestrLic/ site. Uncomment.
 ## Read the function infostring carefully. Run the function.
-# my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
-my_rfgfLoader.download('rfgf_request_example_ВЛГ02282НП.json', 'rfgf_request_result_ВЛГ02282НП.json')
+my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
+
 
 
 ## 2. you may parse the result to view its contents in console, if you want. Uncomment.
 # my_rfgfLoader.parse('rfgf_request_result_noFilter_10.json')
 
 ## 3. Convert json data from json to geopackage. Uncomment. Read the function infostring carefully. Run.
-# my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r_.gpkg', 'l_b')
-my_rfgfLoader.json2gpkg('rfgf_request_result_ВЛГ02282НП.json', 'd_r__.gpkg', 'l_b')
+my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r_.gpkg', 'l_b')
+
