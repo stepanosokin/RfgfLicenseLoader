@@ -263,9 +263,11 @@ class RfgfLicenseLoader():
                     # first_point_geom = QgsGeometry.fromPointXY(first_point)
                     # first_point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
                     # first_point = first_point_geom.asPoint()
-                    ring_first_point_geom = QgsGeometry.fromPointXY(ring_first_point)
-                    ring_first_point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
-                    ring_first_point_transf = ring_first_point_geom.asPoint()
+
+                    if ring_first_point.x() > coords_threshold and ring_first_point.y() > coords_threshold and ring_first_point.x() <= 180 and ring_first_point.y() <= 90:
+                        ring_first_point_geom = QgsGeometry.fromPointXY(ring_first_point)
+                        ring_first_point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
+                        ring_first_point_transf = ring_first_point_geom.asPoint()
 
 
                     if self.dms_to_dec(row[2]) > coords_threshold and self.dms_to_dec(row[1]) > coords_threshold:
@@ -276,7 +278,8 @@ class RfgfLicenseLoader():
                             ring_list_of_points.append(point_geom.asPoint())
 
         if len(ring_list_of_points) > 2:
-            ring_list_of_points.append(ring_first_point_transf)
+            if ring_first_point_transf.x() > coords_threshold and ring_first_point_transf.y() > coords_threshold and ring_first_point_transf.x() <= 180 and ring_first_point_transf.y() <= 90:
+                ring_list_of_points.append(ring_first_point_transf)
             pol_list_of_rings.append(ring_list_of_points)
             multipol_list_of_pols.append(pol_list_of_rings)
 
@@ -318,5 +321,5 @@ my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_reques
 # my_rfgfLoader.parse('rfgf_request_result_noFilter_10.json')
 
 ## 3. Convert json data from json to geopackage. Uncomment. Read the function infostring carefully. Run.
-my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r_.gpkg', 'l_b')
+my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r__.gpkg', 'l_b')
 
