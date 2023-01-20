@@ -317,8 +317,7 @@ my_rfgfLoader = RfgfLicenseLoader()
 
 ## 1. download the json data file with license blocks data from https://rfgf.ru/ReestrLic/ site. Uncomment.
 ## Read the function infostring carefully. Run the function.
-# my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
-my_rfgfLoader.download('rfgf_request_example_УЛН09160НР.json', 'rfgf_request_result_УЛН09160НР.json')
+my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
 
 
 
@@ -327,6 +326,5 @@ my_rfgfLoader.download('rfgf_request_example_УЛН09160НР.json', 'rfgf_reques
 # my_rfgfLoader.parse('rfgf_request_result_noFilter_10.json')
 
 ## 3. Convert json data from json to geopackage. Uncomment. Read the function infostring carefully. Run.
-# my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r__.gpkg', 'l_b')
-my_rfgfLoader.json2gpkg('rfgf_request_result_УЛН09160НР.json', 'd_r_.gpkg', 'l_b')
+my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r__.gpkg', 'l_b')
 
