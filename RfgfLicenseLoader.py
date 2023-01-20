@@ -204,7 +204,7 @@ class RfgfLicenseLoader():
                 row2 = row
                 row3 = row
                 row4 = row
-                for word in row:
+                for word in list(row):
                     if 'ГСК-2011' in word:
                         cur_crs = gsk2011_crs
                         cur_crs_name = 'ГСК-2011'
@@ -222,8 +222,8 @@ class RfgfLicenseLoader():
                         Multipoint = True
                         first_points_after_multipoint_counter = 0
 
-                if (any('Объект' in word1 for word1 in row1) and any('№' in word2 for word2 in row2)) or \
-                        (any('Система' in word3 for word3 in row3) and any('координат' in word4 for word4 in row4)):
+                if (any('Объект' in word1 for word1 in list(row)) and any('№' in word2 for word2 in list(row))) or \
+                        (any('Система' in word3 for word3 in list(row)) and any('координат' in word4 for word4 in list(row))):
                     if len(ring_list_of_points) > 0:
                         if len(ring_list_of_points) > 2:
                             ring_list_of_points.append(ring_first_point)
@@ -260,9 +260,13 @@ class RfgfLicenseLoader():
                             self.dms_to_dec(row[1]) > coords_threshold and \
                             (ring_first_point.x() < coords_threshold or ring_first_point.y() < coords_threshold):
                         ring_first_point = QgsPointXY(self.dms_to_dec(row[2]), self.dms_to_dec(row[1]))
-                    first_point_geom = QgsGeometry.fromPointXY(first_point)
-                    first_point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
-                    first_point = first_point_geom.asPoint()
+                    # first_point_geom = QgsGeometry.fromPointXY(first_point)
+                    # first_point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
+                    # first_point = first_point_geom.asPoint()
+                    ring_first_point_geom = QgsGeometry.fromPointXY(ring_first_point)
+                    ring_first_point_geom.transform(QgsCoordinateTransform(cur_crs, wgs84_crs, context))
+                    ring_first_point_transf = ring_first_point_geom.asPoint()
+
 
                     if self.dms_to_dec(row[2]) > coords_threshold and self.dms_to_dec(row[1]) > coords_threshold:
                         point = QgsPointXY(self.dms_to_dec(row[2]), self.dms_to_dec(row[1]))
@@ -272,7 +276,7 @@ class RfgfLicenseLoader():
                             ring_list_of_points.append(point_geom.asPoint())
 
         if len(ring_list_of_points) > 2:
-            ring_list_of_points.append(ring_first_point)
+            ring_list_of_points.append(ring_first_point_transf)
             pol_list_of_rings.append(ring_list_of_points)
             multipol_list_of_pols.append(pol_list_of_rings)
 
@@ -306,10 +310,13 @@ my_rfgfLoader = RfgfLicenseLoader()
 
 ## 1. download the json data file with license blocks data from https://rfgf.ru/ReestrLic/ site. Uncomment.
 ## Read the function infostring carefully. Run the function.
-my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
+# my_rfgfLoader.download('rfgf_request_example_noFilter_250000.json', 'rfgf_request_result_noFilter_250000.json')
+my_rfgfLoader.download('rfgf_request_example_ВЛГ02282НП.json', 'rfgf_request_result_ВЛГ02282НП.json')
+
 
 ## 2. you may parse the result to view its contents in console, if you want. Uncomment.
 # my_rfgfLoader.parse('rfgf_request_result_noFilter_10.json')
 
 ## 3. Convert json data from json to geopackage. Uncomment. Read the function infostring carefully. Run.
-# my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r.gpkg', 'l_b')
+# my_rfgfLoader.json2gpkg('rfgf_request_result_noFilter_250000.json', 'd_r_.gpkg', 'l_b')
+my_rfgfLoader.json2gpkg('rfgf_request_result_ВЛГ02282НП.json', 'd_r__.gpkg', 'l_b')
