@@ -115,8 +115,7 @@ class RfgfLicenseLoader():
         b_counter = 0
         # loop through json data rows
         for i in range(len(json_data['result']['data']['rows'])):
-            # create new feature
-            feat = QgsFeature(vlayer.fields())
+
             # list of geopackage layer field names
             gpkg_field_names_list = ['rfgf_link', 'gos_reg_num', 'date_register', 'license_purpose', 'resource_type',
                                      'license_block_name', 'region', 'status', 'user_info', 'licensor',
@@ -130,31 +129,40 @@ class RfgfLicenseLoader():
             #check if the record has geometry
             if json_data['result']['data']['values'][8][i]:
                 if '°' in json_data['result']['data']['values'][8][i]:
-                    k = 0  # index of an item in gpkg_field_names_list
-                    # loop through  json data record indexes
-                    for j in json_attr_index_list:
-                        if j not in (3, 16, 18):    # if not date format
-                            # add field value to feature
-                            feat[gpkg_field_names_list[k]] = json_data['result']['data']['values'][j][i]
-                            pass
-                        else:                       # if date format
-                            feat[gpkg_field_names_list[k]] = json_data['result']['data']['values'][j][i]
-                            pass
-                        k += 1
 
-                    ## add geometry to feature
-                    geom = self.parseGeometry(json_data['result']['data']['values'][8][i], 0.1)
-                    # assign new geometry to feature
-                    feat.setGeometry(geom)
+                    # first, let's parse record's geometry
+                    record_has_geom, geom = self.parseGeometry(json_data['result']['data']['values'][8][i], 0.1)
 
-                    ## add feature to layer
-                    (res, outFeats) = vlayer.dataProvider().addFeatures([feat])
-                    # next blocks counter
-                    b_counter += 1
+                    # If the record has valid multipolygon geometry:
+                    if record_has_geom:
+                        # create new feature
+                        feat = QgsFeature(vlayer.fields())
+
+                        k = 0  # index of an item in gpkg_field_names_list
+                        # loop through  json data record indexes
+                        for j in json_attr_index_list:
+                            if j not in (3, 16, 18):    # if not date format
+                                # add field value to feature
+                                feat[gpkg_field_names_list[k]] = json_data['result']['data']['values'][j][i]
+                                pass
+                            else:                       # if date format
+                                feat[gpkg_field_names_list[k]] = json_data['result']['data']['values'][j][i]
+                                pass
+                            k += 1
+
+                        # assign new geometry to feature
+                        feat.setGeometry(geom)
+
+                        ## add feature to layer
+                        (res, outFeats) = vlayer.dataProvider().addFeatures([feat])
+                        # next blocks counter
+                        b_counter += 1
+
             # print report about every 1000 rows processed
             if i % 1000 == 0:
                 print(f'{i} rows processed')
                 print(f'{b_counter} blocks inserted')
+
 
     # parse the license block geometry from json cell and transform it to wgs84
     def parseGeometry(self, source_geom, coords_threshold):
@@ -166,7 +174,8 @@ class RfgfLicenseLoader():
         Transformations are made with GOST 32453-2017 parameters.
         :param source_geom: this is the coordinates of the block copied from https://rfgf.ru/ReestrLic/
         :param coords_threshold: this is the minimum value for coordinates under which the value is ignored
-        :return: QgsGeometry.fromMultiPolygonXY() object
+        :return: tuple with two objects: 1 - bool, shows whether the record has valid polygon geometry at all;
+        2 - QgsGeometry.fromMultiPolygonXY() object
         '''
 
         if coords_threshold == 0:
@@ -175,6 +184,7 @@ class RfgfLicenseLoader():
 
         first_point = QgsPointXY(0, 0)
 
+        record_has_geometry = False
         ring_list_of_points = []
         pol_list_of_rings = []
         multipol_list_of_pols = []
@@ -230,6 +240,7 @@ class RfgfLicenseLoader():
                             if ring_first_point_transf.x() > coords_threshold and ring_first_point_transf.y() > coords_threshold and ring_first_point_transf.x() <= 180 and ring_first_point_transf.y() <= 90:
                                 ring_list_of_points.append(ring_first_point_transf)
                             pol_list_of_rings.append(ring_list_of_points)
+                            record_has_geometry = True
                             multipol_list_of_pols.append(pol_list_of_rings)
                         ring_list_of_points = []
                         pol_list_of_rings = []
@@ -248,6 +259,7 @@ class RfgfLicenseLoader():
                         if ring_first_point_transf.x() > coords_threshold and ring_first_point_transf.y() > coords_threshold and ring_first_point_transf.x() <= 180 and ring_first_point_transf.y() <= 90:
                             ring_list_of_points.append(ring_first_point_transf)
                         pol_list_of_rings.append(ring_list_of_points)
+                        record_has_geometry = True
                     ring_list_of_points = []
                     ring_first_point = QgsPointXY(0, 0)
 
@@ -285,11 +297,13 @@ class RfgfLicenseLoader():
             if ring_first_point_transf.x() > coords_threshold and ring_first_point_transf.y() > coords_threshold and ring_first_point_transf.x() <= 180 and ring_first_point_transf.y() <= 90:
                 ring_list_of_points.append(ring_first_point_transf)
             pol_list_of_rings.append(ring_list_of_points)
+            record_has_geometry = True
             multipol_list_of_pols.append(pol_list_of_rings)
 
         multipolygon_geometry = QgsGeometry.fromMultiPolygonXY(multipol_list_of_pols)
 
-        return multipolygon_geometry
+        return (record_has_geometry, multipolygon_geometry)
+
 
     def split_strip(self, my_str):
         while '  ' in my_str:
@@ -297,12 +311,17 @@ class RfgfLicenseLoader():
         my_list = [i.strip().split() for i in my_str.splitlines()]
         return my_list
 
+
     # converts DDD°MM'SS.SSSSSS"E to decimal
     def dms_to_dec(self, dms_coords):
 
-        dec_coords = abs(float(dms_coords[:dms_coords.find('°')])) + \
-                     abs(float(dms_coords[dms_coords.find('°') + 1:dms_coords.find('\'')])) / 60 + \
-                     abs(float(dms_coords[dms_coords.find('\'') + 1:dms_coords.find('"')])) / 3600
+        dec_coords = 0.0
+        if dms_coords[:dms_coords.find('°')].replace('-', '').isdigit() \
+                and dms_coords[dms_coords.find('°') + 1:dms_coords.find('\'')].replace('-', '').isdigit() \
+                and dms_coords[dms_coords.find('\'') + 1:dms_coords.find('"')].replace('-', '').replace('.', '').isdigit():
+            dec_coords = abs(float(dms_coords[:dms_coords.find('°')])) + \
+                         abs(float(dms_coords[dms_coords.find('°') + 1:dms_coords.find('\'')])) / 60 + \
+                         abs(float(dms_coords[dms_coords.find('\'') + 1:dms_coords.find('"')])) / 3600
 
         if dms_coords[dms_coords.find('"') + 1:] in ['W', 'S']:
             dec_coords *= -1
